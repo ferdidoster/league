@@ -7,19 +7,17 @@
           class="search-bar"
           placeholder="Search for champion or Summoner..."
           v-model="query"
-          @keypress.enter="fetchSummonerId"
+          @keypress.enter="fetchPlayerInformation"
         />
       </div>
 
       <div class="summoner-name">
-        <h3>{{ summoner_name }}</h3>
-        <h6>{{ summoner_level }}</h6>
+        <h3>{{ summonerName }}</h3>
+        <h6>{{ summonerLevel }}</h6>
       </div>
 
       <div class="summoner-rank">
-        <h4>Ranked</h4>
-        <h6>Solo</h6>
-        <h6>Flex</h6>
+        <rank v-if="summonerId" :summoner-id="summonerId"/>
       </div>
 
       <div class="summoner-champions">
@@ -27,61 +25,65 @@
       </div>
 
       <div class="summoner-matches">
-        <h4>Match history</h4>
-        <div class="history">213</div>
+        <matchhistory/>
       </div>
-      
     </main>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import rank from "./components/Rank.vue";
+import matchhistory from "./components/Matchhistory.vue";
+import RiotService from './services/RiotService';
 
 export default {
   name: "app",
-  components: {},
+  components: {
+    rank,
+    matchhistory,
+  },
   data() {
     return {
-      query:'',
-      result: '',
-      api_key: "RGAPI-706d8a62-ef3c-4e4b-876c-30d45263fc4d",
-      summoner_id: '',
-      summoner_name: '',
-      summoner_level: '',
-      url_base: ''
+      query: "",
+      result: "",
+      api_key: process.env.VUE_APP_API_KEY,
+      summonerId: "",
+      summonerName: "",
+      summonerLevel: "",
+
+      matches:"",
+      matchTotal:"",
+      matchLane:"",
+      matchRole:"",
+      matchChampion:"",
+      matchQueueType:"",
+      matchTimeStamp:""
     };
   },
   methods: {
-    // async fetchMasteryScore() {
-    //   const response = await axios.get(
-    //     "/lol/champion-mastery/v4/scores/by-summoner/" + this.summoner_id,
-    //     {
-    //       headers: {
-    //         "X-Riot-Token": this.api_key
-    //       }
-    //     }
-    //   );
-    //   return response.data;
-    // },
     async fetchSummonerId() {
-      const response = await axios.get(
-        "/lol/summoner/v4/summoners/by-name/" + this.query,
+      const response = await RiotService.fetchSummonerId(this.query)
+      this.summonerId = response.id;
+      this.summonerName = response.name;
+      this.summonerLevel = response.summonerLevel;
+      this.summonerAccountId = response.accountId;
+    },
+    async fetchMatchhistory(){
+      const matchHistoryResponse = await axios.get(
+        "/lol/match/v4/matchlists/by-account/" + this.accountId,
         {
           headers: {
             "X-Riot-Token": this.api_key
           }
         }
-      );
-      this.summoner_id = response.data.id;
-      this.summoner_name = response.data.name;
-      this.summoner_level = response.data.summonerLevel;
-      return response.data;
+      )
+      return matchHistoryResponse.data;
+    },
+    async fetchPlayerInformation() {
+      await this.fetchSummonerId();
     }
-  },
-  // async created() {
-  //   this.result = await this.fetchMasteryScore();
-  // }
+  }
 };
 </script>
 
@@ -96,7 +98,7 @@ body {
   font-family: "montserrat", sans-serif;
 }
 
-h4{
+h4 {
   text-align: center;
 }
 
@@ -150,22 +152,24 @@ main {
   margin: 0 auto;
 }
 
-.summoner-name, .summoner-rank, .summoner-champions, .summoner-matches{
-  background-color:rgb(51, 55, 85);
+.summoner-name,
+.summoner-rank,
+.summoner-champions,
+.summoner-matches {
+  background-color: rgb(51, 55, 85);
   box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.5);
   border-radius: 8px 8px 8px 8px;
   padding: 16px;
   margin: 8px;
 }
 
-.summoner-name{
+.summoner-name {
   align-content: center;
   align-items: center;
   text-align: center;
 }
 
-.history{
+.history {
   background-color: rgb(26, 28, 44);
-
 }
 </style>
