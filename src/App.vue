@@ -25,14 +25,13 @@
       </div>
 
       <div class="summoner-matches">
-        <matchhistory/>
+        <matchhistory v-if="summonerAccountId" :summoner-account-id="summonerAccountId"/>
       </div>
     </main>
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import rank from "./components/Rank.vue";
 import matchhistory from "./components/Matchhistory.vue";
 import RiotService from './services/RiotService';
@@ -51,6 +50,7 @@ export default {
       summonerId: "",
       summonerName: "",
       summonerLevel: "",
+      summonerAccountId:"",
 
       matches:"",
       matchTotal:"",
@@ -69,19 +69,15 @@ export default {
       this.summonerLevel = response.summonerLevel;
       this.summonerAccountId = response.accountId;
     },
-    async fetchMatchhistory(){
-      const matchHistoryResponse = await axios.get(
-        "/lol/match/v4/matchlists/by-account/" + this.accountId,
-        {
-          headers: {
-            "X-Riot-Token": this.api_key
-          }
-        }
-      )
-      return matchHistoryResponse.data;
+    async fetchChampionData(){
+      const championData = await RiotService.fetchChampionData();
+      this.champions = championData.data.data;
+      // eslint-disable-next-line no-console
+      console.log(this.champions);
     },
     async fetchPlayerInformation() {
       await this.fetchSummonerId();
+      await this.fetchChampionData();
     }
   }
 };

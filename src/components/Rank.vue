@@ -33,8 +33,6 @@ export default {
     async fetchRanks(summonerId) {
       const rankResponse = await RiotService.fetchRanks(summonerId);
       for (let element of rankResponse) {
-          // eslint-disable-next-line no-console
-          console.log(element)
         if (element.queueType === "RANKED_SOLO_5x5") {
           this.rankSolo = element.tier;
           this.divisionSolo = element.rank;

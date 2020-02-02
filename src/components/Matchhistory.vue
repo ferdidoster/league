@@ -1,18 +1,43 @@
 <template>
-    <div></div>
+  <div>
+    <div v-for="match in matches" :key="match.matchId">
+      lane: {{ match.matchLane }} champion: {{ match.matchChampion }}
+    </div>
+  </div>
 </template>
 
-
 <script>
-export default {
-    name: 'machthistory',
-    data(){
-        return{
+import RiotService from "../services/RiotService";
 
-        }
-    },
-    methods:{
-        
+export default {
+  name: "machthistory",
+  props: ["summonerAccountId"],
+  data() {
+    return {
+      matches: [],
+      championData:""
+    };
+  },
+  methods: {
+    async fetchMatchHistory(summonerAccountId) {
+      const matchHistoryResponse = await RiotService.fetchMatchHistory(
+        summonerAccountId
+      );
+
+      matchHistoryResponse.matches
+        .filter((element, index) => index < 20)
+        .forEach(entry =>
+          this.matches.push({
+            matchLane: entry.lane,
+            matchId: entry.gameId,
+            matchChampion: entry.champion
+          })
+        );
+
     }
-}
+  },
+  async created() {
+    await this.fetchMatchHistory(this.summonerAccountId);
+  }
+};
 </script>

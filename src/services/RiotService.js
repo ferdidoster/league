@@ -12,20 +12,33 @@ const RiotService = {
     const rankResponse = await this.request(
       "/lol/league/v4/entries/by-summoner/" + summonerId
     );
-    
+
     return rankResponse.data;
   },
 
-  async fetchMatchhistory(accountId) {
+  async fetchMatchHistory(summonerAccountId) {
     const matchHistoryResponse = await this.request(
-      "/lol/match/v4/matchlists/by-account/" + accountId
+      "/lol/match/v4/matchlists/by-account/" + summonerAccountId
     );
+
     return matchHistoryResponse.data;
   },
+
+  async fetchChampionData() {
+    const championDataResponse = await axios.get(
+      "http://ddragon.leagueoflegends.com/cdn/10.2.1/data/en_US/champion.json"
+    );
+    // eslint-disable-next-line no-console
+    console.log(championDataResponse);
+    return championDataResponse;
+  },
+
   async fetchPlayerInformation() {
     await this.fetchSummonerId();
     await this.fetchRanks();
+    await this.fetchMatchHistory();
   },
+
   async request(endpoint) {
     return axios.get(endpoint, {
       headers: {
