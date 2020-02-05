@@ -17,23 +17,24 @@
       </div>
 
       <div class="summoner-rank">
-        <rank v-if="summonerId" :summoner-id="summonerId"/>
+        <rank v-if="summonerId" :summoner-id="summonerId" :champions="champions"/>
       </div>
 
       <div class="summoner-champions">
-        <h4>Champion-pool</h4>
+        <championpool/>
       </div>
 
       <div class="summoner-matches">
-        <matchhistory v-if="summonerAccountId" :summoner-account-id="summonerAccountId"/>
+        <matchhistory v-if="summonerAccountId" :summoner-account-id="summonerAccountId" :champions="champions"/>
       </div>
     </main>
-  </div>
+  </div> 
 </template>
 
 <script>
 import rank from "./components/Rank.vue";
 import matchhistory from "./components/Matchhistory.vue";
+import championpool from "./components/Championpool.vue";
 import RiotService from './services/RiotService';
 
 export default {
@@ -41,6 +42,7 @@ export default {
   components: {
     rank,
     matchhistory,
+    championpool,
   },
   data() {
     return {
@@ -52,13 +54,7 @@ export default {
       summonerLevel: "",
       summonerAccountId:"",
 
-      matches:"",
-      matchTotal:"",
-      matchLane:"",
-      matchRole:"",
-      matchChampion:"",
-      matchQueueType:"",
-      matchTimeStamp:""
+      champions:[],
     };
   },
   methods: {
@@ -68,6 +64,8 @@ export default {
       this.summonerName = response.name;
       this.summonerLevel = response.summonerLevel;
       this.summonerAccountId = response.accountId;
+      // eslint-disable-next-line no-console
+      console.log(this.summonerId);
     },
     async fetchChampionData(){
       const championData = await RiotService.fetchChampionData();
